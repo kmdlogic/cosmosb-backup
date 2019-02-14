@@ -43,7 +43,7 @@
             }
 
             database = client.CreateDatabaseQuery()
-                             .Where(x => string.Equals(x.Id, options.Database, StringComparison.InvariantCultureIgnoreCase))
+                             .Where(x => x.Id == options.Database)
                              .AsEnumerable()
                              .FirstOrDefault();
 
@@ -132,7 +132,7 @@
                             OfferThroughput = options.DatabaseThroughput
                         };
 
-                var response = await client.CreateDatabaseIfNotExistsAsync(new Database { Id = databaseName }, databaseOptions).ConfigureAwait(false);
+                var response = await client.CreateDatabaseIfNotExistsAsync(new Database { Id = options.Database }, databaseOptions).ConfigureAwait(false);
 
                 database = response.Resource;
             }
@@ -158,13 +158,23 @@
                                     : new PartitionKeyDefinition { Paths = { $"/{options.PartitionKey}" } }
                 };
 
-                var collectionOptions = options.CollectionThroughput == null
-                    ? null
-                    : new RequestOptions
+                var reservedTroughput = options.ReserverdTroughput.Split(';').FirstOrDefault(x => x.Split(':')[0] == collectionName);
+
+                RequestOptions collectionOptions = null;
+
+                if (reservedTroughput != null)
+                {
+                    collectionOptions = new RequestOptions() { OfferThroughput = int.Parse(reservedTroughput.Split(':')[1]) };
+                }
+
+                if (options.CollectionThroughput != null)
+                {
+                    collectionOptions = new RequestOptions
                     {
                         OfferEnableRUPerMinuteThroughput = true,
                         OfferThroughput = options.CollectionThroughput
                     };
+                }
 
                 await client.CreateDocumentCollectionIfNotExistsAsync(database.SelfLink, documentCollection, collectionOptions).ConfigureAwait(false);
 
@@ -223,8 +233,8 @@
 
             var policy = new ConnectionPolicy
             {
-                ConnectionMode = ConnectionMode.Direct,
-                ConnectionProtocol = Protocol.Tcp
+                ConnectionMode = ConnectionMode.Gateway,
+                ConnectionProtocol = Protocol.Https
             };
 
             return new DocumentClient(new Uri(accountEndpoint, UriKind.Absolute), accountKey, policy);
