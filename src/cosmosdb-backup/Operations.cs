@@ -43,7 +43,9 @@
             }
 
             database = client.CreateDatabaseQuery()
-                             .Where(x => x.Id == options.Database)
+#pragma warning disable CA1304 // Specify CultureInfo - CosmosDB Linq doesn't support this
+                             .Where(x => x.Id.ToLower() == options.Database.ToLower())
+#pragma warning restore CA1304 // Specify CultureInfo
                              .AsEnumerable()
                              .FirstOrDefault();
 
@@ -115,6 +117,26 @@
 
         private async Task<int> Restore()
         {
+            var reservedThroughput = new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase);
+            if (!string.IsNullOrEmpty(options.CollectionReservedThroughput))
+            {
+                foreach (var reservedSegment in options.CollectionReservedThroughput.Split(';').Where(x => !string.IsNullOrWhiteSpace(x)))
+                {
+                    var reservedParts = reservedSegment.Split(":");
+
+                    if (reservedParts.Length != 2
+                        || string.IsNullOrWhiteSpace(reservedParts[0])
+                        || reservedThroughput.ContainsKey(reservedParts[0])
+                        || !int.TryParse(reservedParts[1], out int throughput))
+                    {
+                        Log.Error("Unexpected reserved throughput segment: {ReservedSegment}", reservedSegment);
+                        return 1;
+                    }
+
+                    reservedThroughput.Add(reservedParts[0], throughput);
+                }
+            }
+
             var jsonFiles = directory.GetFiles("*.cosmosbak", new EnumerationOptions { RecurseSubdirectories = false });
             if (jsonFiles.Length == 0)
             {
@@ -158,16 +180,16 @@
                                     : new PartitionKeyDefinition { Paths = { $"/{options.PartitionKey}" } }
                 };
 
-                var reservedTroughput = options.ReserverdTroughput.Split(';').FirstOrDefault(x => x.Split(':')[0] == collectionName);
-
                 RequestOptions collectionOptions = null;
 
-                if (reservedTroughput != null)
+                if (reservedThroughput.TryGetValue(collectionName, out int throughput))
                 {
-                    collectionOptions = new RequestOptions() { OfferThroughput = int.Parse(reservedTroughput.Split(':')[1]) };
+                    collectionOptions = new RequestOptions
+                    {
+                        OfferThroughput = throughput
+                    };
                 }
-
-                if (options.CollectionThroughput != null)
+                else if (options.CollectionThroughput != null)
                 {
                     collectionOptions = new RequestOptions
                     {
@@ -206,7 +228,7 @@
         {
             var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var segment in options.ConnectionString.Split(';'))
+            foreach (var segment in options.ConnectionString.Split(';').Where(x => !string.IsNullOrWhiteSpace(x)))
             {
                 var pos = segment.IndexOf('=', StringComparison.Ordinal);
 
@@ -231,11 +253,18 @@
                 return null;
             }
 
-            var policy = new ConnectionPolicy
+            var policy = new ConnectionPolicy();
+
+            if (options.ConnectionMode == CosmosConnection.Direct)
             {
-                ConnectionMode = ConnectionMode.Gateway,
-                ConnectionProtocol = Protocol.Https
-            };
+                policy.ConnectionMode = ConnectionMode.Direct;
+                policy.ConnectionProtocol = Protocol.Tcp;
+            }
+            else
+            {
+                policy.ConnectionMode = ConnectionMode.Gateway;
+                policy.ConnectionProtocol = Protocol.Https;
+            }
 
             return new DocumentClient(new Uri(accountEndpoint, UriKind.Absolute), accountKey, policy);
         }

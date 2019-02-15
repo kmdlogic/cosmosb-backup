@@ -15,6 +15,19 @@ namespace CosmosBackup
         Restore
     }
 
+    public enum CosmosConnection
+    {
+        /// <summary>
+        /// Use Gateway/HTTPS mode
+        /// </summary>
+        Gateway = 0,
+
+        /// <summary>
+        /// Use Direct/TCP mode
+        /// </summary>
+        Direct
+    }
+
     public class Options
     {
         [Option('a', "action", Required = true, HelpText = "The action to perform (Backup or Restore)")]
@@ -22,6 +35,9 @@ namespace CosmosBackup
 
         [Option('c', "connectionstring", Required = true, HelpText = "The connection string to CosmosDb")]
         public string ConnectionString { get; set; }
+
+        [Option('m', "connectionmode", Required = false, HelpText = "The connection mode to CosmosDb (Gateway or Direct)")]
+        public CosmosConnection ConnectionMode { get; set; }
 
         [Option('d', "databasename", Required = true, HelpText = "The database name to backup or restore")]
         public string Database { get; set; }
@@ -38,10 +54,10 @@ namespace CosmosBackup
         [Option('t', "databasethroughput", Required = false, HelpText = "The throughput (RUs) for the database when being created.")]
         public int? DatabaseThroughput { get; set; }
 
-        [Option('r', "collectionthroughput", Required = false, HelpText = "The throughput (RUs) for the collection when being created.")]
-        public int? CollectionThroughput { get; set; }
+        [Option('r', "reservedthroughput", Required = false, HelpText = "The throughput (RUs) reserved for a collection when using database throughput. Format: \"CollectionName:throughput;...\" ")]
+        public string CollectionReservedThroughput { get; set; }
 
-        [Option('e', "collectionreserverthroughput", Required = false, HelpText = "Name of collection and required throughput for it. Format: \"CollectionName:throughput;...\" ")]
-        public string ReserverdTroughput { get; set; }
+        [Option('x', "collectionthroughput", Required = false, HelpText = "The throughput (RUs) for the collection when being created.")]
+        public int? CollectionThroughput { get; set; }
     }
 }

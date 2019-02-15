@@ -7,25 +7,28 @@ The files should be named `collection name`.cosmosbak and contain an array of JS
 Command line options:
 
 ```
-  -a, --action                          Required. The action to perform (Backup or Restore)
+  -a, --action                  Required. The action to perform (Backup or Restore)
 
-  -c, --connectionstring                Required. The connection string to CosmosDb
+  -c, --connectionstring        Required. The connection string to CosmosDb
 
-  -d, --databasename                    Required. The database name to backup or restore
+  -m, --connectionmode          The connection mode to CosmosDb (Gateway or Direct)
 
-  -p, --partitionkey                    The partition key field
+  -d, --databasename            Required. The database name to backup or restore
 
-  -k, --defaultkey                      The default partition key if not present in the document
+  -p, --partitionkey            The partition key field
 
-  -f, --folder                          The folder used for the backup or restore. Defaults to the current directory.
+  -k, --defaultkey              The default partition key if not present in the document
 
-  -t, --databasethroughput              The throughput (RUs) for the database when being created.
+  -f, --folder                  The folder used for the backup or restore. Defaults to the current directory.
 
-  -r, --collectionthroughput            The throughput (RUs) for the collection when being created.
+  -t, --databasethroughput      The throughput (RUs) for the database when being created.
 
-  -e, --collectionreserverthroughput    Name of collection and required throughput for it. Format: "CollectionName:throughput;..."
+  -r, --reservedthroughput      The throughput (RUs) reserved for a collection when using database throughput. Format:
+                                "CollectionName:throughput;..."
 
-  --help                                Display this help screen.
+  -x, --collectionthroughput    The throughput (RUs) for the collection when being created.
 
-  --version                             Display version information.
+  --help                        Display this help screen.
+
+  --version                     Display version information.
 ```
