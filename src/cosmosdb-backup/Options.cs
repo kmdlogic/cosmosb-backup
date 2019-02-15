@@ -40,5 +40,8 @@ namespace CosmosBackup
 
         [Option('r', "collectionthroughput", Required = false, HelpText = "The throughput (RUs) for the collection when being created.")]
         public int? CollectionThroughput { get; set; }
+
+        [Option('e', "collectionreserverthroughput", Required = false, HelpText = "Name of collection and required throughput for it. Format: \"CollectionName:throughput;...\" ")]
+        public string ReserverdTroughput { get; set; }
     }
 }
