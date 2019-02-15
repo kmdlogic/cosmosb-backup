@@ -43,7 +43,9 @@
             }
 
             database = client.CreateDatabaseQuery()
-                             .Where(x => string.Equals(x.Id, options.Database, StringComparison.InvariantCultureIgnoreCase))
+#pragma warning disable CA1304 // Specify CultureInfo
+                             .Where(x => x.Id.ToLower() == options.Database.ToLower())
+#pragma warning restore CA1304 // Specify CultureInfo
                              .AsEnumerable()
                              .FirstOrDefault();
 
@@ -198,6 +200,11 @@
 
             foreach (var segment in options.ConnectionString.Split(';'))
             {
+                if (string.IsNullOrEmpty(segment))
+                {
+                    continue;
+                }
+
                 var pos = segment.IndexOf('=', StringComparison.Ordinal);
 
                 if (pos <= 0)
