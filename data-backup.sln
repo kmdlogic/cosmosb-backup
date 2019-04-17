@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.421
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.156
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "cosmosdb-backup", "src\cosmosdb-backup\cosmosdb-backup.csproj", "{8A859DB0-92A8-4793-BA19-74535667D58B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "data-backup", "src\data-backup\data-backup.csproj", "{8A859DB0-92A8-4793-BA19-74535667D58B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
