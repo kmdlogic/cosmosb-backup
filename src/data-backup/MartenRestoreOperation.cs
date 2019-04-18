@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Npgsql;
@@ -93,7 +94,26 @@ namespace DataBackup
 
                         if (pDict.TryGetValue("doctype", out var typeParam))
                         {
-                            SetParameterFromObject(typeParam, entity, "$type");
+                            var type = GetPropertyValue(entity, "$type", file.EntityName);
+
+                            // Pull the central type out
+                            type = Regex.Replace(type, @"^.*\[", string.Empty);
+                            type = Regex.Replace(type, @"\].*$", string.Empty);
+
+                            // Remove the assembly
+                            type = Regex.Replace(type, @"\s*,.*$", string.Empty);
+
+                            // Remove the namespace
+                            type = Regex.Replace(type, @"^.*\.", string.Empty);
+
+                            // Convert the class name from PascalCase into snake_case
+                            type = Regex.Replace(type, @"(\P{Ll})(\P{Ll}\p{Ll})", "$1_$2");
+                            type = Regex.Replace(type, @"(\p{Ll})(\P{Ll})", "$1_$2");
+
+                            // Change to lower case
+                            type = type.ToLowerInvariant();
+
+                            typeParam.Value = type;
                         }
 
                         foreach (var pair in pDict.Where(x => x.Key.StartsWith("arg_", StringComparison.OrdinalIgnoreCase)))

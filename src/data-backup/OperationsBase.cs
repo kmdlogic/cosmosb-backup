@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +9,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DataBackup
 {
+    [SuppressMessage("CodeAnalysis", "CA1822", Justification = "Prefer the clarity of instance methods")]
     public abstract class OperationsBase
     {
         public const string BackupExtension = ".jsonbak";
@@ -38,6 +41,13 @@ namespace DataBackup
         protected DataFile CreateBackupFile(string entityName)
         {
             return new DataFile(new FileInfo(Path.Combine(Directory.FullName, entityName + BackupExtension)));
+        }
+
+        protected string GetPropertyValue(JObject entity, string propertyName, string defaultValue = null)
+        {
+            var prop = entity.GetValue(propertyName, StringComparison.OrdinalIgnoreCase);
+
+            return prop?.Value<string>() ?? defaultValue;
         }
 
         protected class DataFile
