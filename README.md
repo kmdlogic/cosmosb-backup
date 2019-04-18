@@ -1,4 +1,4 @@
-# cosmosdb-backup
+# data-backup
 
 Backup and restore a [CosmosDB](https://docs.microsoft.com/en-us/azure/cosmos-db/introduction) or [PostgreSQL/Marten](http://jasperfx.github.io/marten/) database to or from files.
 
