@@ -11,7 +11,7 @@ namespace DataBackup
         [Option('f', "folder", Required = false, HelpText = "The folder used for the backup or restore. Defaults to the current directory.")]
         public string Folder { get; set; }
 
-        [Option('c', "connectionstring", Required = true, HelpText = "The connection string to PostgreSQL")]
+        [Option('c', "connectionstring", Required = true, HelpText = "The connection string to PostgreSQL.")]
         public string ConnectionString { get; set; }
     }
 }

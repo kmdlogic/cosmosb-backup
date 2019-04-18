@@ -24,13 +24,13 @@ namespace DataBackup
         [Option('f', "folder", Required = false, HelpText = "The folder used for the backup or restore. Defaults to the current directory.")]
         public string Folder { get; set; }
 
-        [Option('c', "connectionstring", Required = true, HelpText = "The connection string to CosmosDb")]
+        [Option('c', "connectionstring", Required = true, HelpText = "The connection string to CosmosDb.")]
         public string ConnectionString { get; set; }
 
-        [Option('m', "connectionmode", Required = false, HelpText = "The connection mode (Gateway or Direct)")]
+        [Option('m', "connectionmode", Required = false, Default = CosmosConnection.Gateway, HelpText = "The connection mode (Gateway or Direct).")]
         public CosmosConnection ConnectionMode { get; set; }
 
-        [Option('d', "databasename", Required = true, HelpText = "The database name to backup or restore")]
+        [Option('d', "databasename", Required = true, HelpText = "The database name to backup or restore.")]
         public string Database { get; set; }
     }
 }
