@@ -31,7 +31,12 @@
                 });
 
                 var result = await commandLineParser
-                        .ParseArguments<CosmosBackupOptions, CosmosRestoreOptions, MartenRestoreOptions>(args)
+                        .ParseArguments<
+                            CosmosBackupOptions,
+                            CosmosRestoreOptions,
+                            MartenRestoreOptions,
+                            MartenBackupOptions
+                        >(args)
                         .WithParsed((ICommonOptions o) =>
                         {
                             minLogLevelSwitch.MinimumLevel = o.Verbosity;
@@ -42,6 +47,7 @@
                           (CosmosBackupOptions opts) => new CosmosBackupOperation(opts).ExecuteAsync(),
                           (CosmosRestoreOptions opts) => new CosmosRestoreOperation(opts).ExecuteAsync(),
                           (MartenRestoreOptions opts) => new MartenRestoreOperation(opts).ExecuteAsync(),
+                          (MartenBackupOptions opts) => new MartenBackupOperation(opts).ExecuteAsync(),
                           errs =>
                           {
                               Console.WriteLine(helpWriter.ToString());
