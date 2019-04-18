@@ -59,41 +59,40 @@ order by table_name";
             {
                 Log.Information("Backing up table {TableName}", table);
 
-                var list = new JArray();
-
-                using (var cmd = Connection.CreateCommand())
+                using (var writer = CreateBackupFile(table.Substring("mt_doc_".Length)).BeginWrite())
                 {
-                    cmd.CommandText = $"select data, mt_last_modified, mt_dotnet_type from {table}";
-
-                    using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
+                    using (var cmd = Connection.CreateCommand())
                     {
-                        while (await reader.ReadAsync().ConfigureAwait(false))
+                        cmd.CommandText = $"select data, mt_last_modified, mt_dotnet_type from {table}";
+
+                        using (var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false))
                         {
-                            var data = reader.GetFieldValue<JObject>(0);
-                            var lastModified = reader.GetFieldValue<DateTimeOffset>(1);
-                            var classType = reader.GetFieldValue<string>(2);
-
-                            var orderedData = new JObject();
-
-                            // The $type property must be first for CosmosDB but the jsonb type doesn't guarantee order
-                            orderedData.Add("$type", GetPropertyValue(data, "$type", classType));
-                            orderedData.Add("_ts", lastModified.ToUnixTimeSeconds());
-
-                            foreach (var prop in data.Properties())
+                            while (await reader.ReadAsync().ConfigureAwait(false))
                             {
-                                if (!string.Equals(prop.Name, "$type", StringComparison.OrdinalIgnoreCase)
-                                 && !string.Equals(prop.Name, "_ts", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    orderedData.Add(prop.Name, prop.Value);
-                                }
-                            }
+                                var data = reader.GetFieldValue<JObject>(0);
+                                var lastModified = reader.GetFieldValue<DateTimeOffset>(1);
+                                var classType = reader.GetFieldValue<string>(2);
 
-                            list.Add(orderedData);
+                                var orderedData = new JObject();
+
+                                // The $type property must be first for CosmosDB but the jsonb type doesn't guarantee order
+                                orderedData.Add("$type", GetPropertyValue(data, "$type", classType));
+                                orderedData.Add("_ts", lastModified.ToUnixTimeSeconds());
+
+                                foreach (var prop in data.Properties())
+                                {
+                                    if (!string.Equals(prop.Name, "$type", StringComparison.OrdinalIgnoreCase)
+                                     && !string.Equals(prop.Name, "_ts", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        orderedData.Add(prop.Name, prop.Value);
+                                    }
+                                }
+
+                                writer.Write(orderedData);
+                            }
                         }
                     }
                 }
-
-                await CreateBackupFile(table.Substring("mt_doc_".Length)).WriteAsync(list).ConfigureAwait(false);
             }
 
             return true;

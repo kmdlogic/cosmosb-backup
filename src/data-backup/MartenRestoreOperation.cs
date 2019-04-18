@@ -55,9 +55,7 @@ namespace DataBackup
 
                 Log.Information("Restoring table {TableName} via upsert function {FunctionName}", tableName, upsertName);
 
-                var data = await file.ReadAsync().ConfigureAwait(false);
-
-                Log.Information("Found {Count} objects to restore", data.Count);
+                var count = 0;
 
                 using (var cmd = Connection.CreateCommand())
                 {
@@ -77,8 +75,10 @@ namespace DataBackup
                         pDict.Add(p.ParameterName, cmd.Parameters.Add(p.ParameterName, p.DbType));
                     }
 
-                    foreach (JObject entity in data)
+                    foreach (var entity in file.Read())
                     {
+                        count++;
+
                         entity.Remove("_pk");
                         entity.Remove("_ts");
                         entity.Remove("_rid");
@@ -126,6 +126,8 @@ namespace DataBackup
                         await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
                     }
                 }
+
+                Log.Information("Restored {Count} objects", count);
             }
 
             return true;

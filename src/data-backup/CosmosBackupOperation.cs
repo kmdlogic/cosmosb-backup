@@ -49,20 +49,19 @@ namespace DataBackup
 
                 var query = Client.CreateDocumentQuery(collectionUri).AsDocumentQuery();
 
-                var list = new JArray();
-
-                do
+                using (var writer = CreateBackupFile(collection.Id).BeginWrite())
                 {
-                    var response = await query.ExecuteNextAsync().ConfigureAwait(false);
-
-                    foreach (var item in response)
+                    do
                     {
-                        list.Add(JToken.FromObject(item));
-                    }
-                }
-                while (query.HasMoreResults);
+                        var response = await query.ExecuteNextAsync().ConfigureAwait(false);
 
-                await CreateBackupFile(collection.Id).WriteAsync(list).ConfigureAwait(false);
+                        foreach (var item in response)
+                        {
+                            writer.Write(JToken.FromObject(item));
+                        }
+                    }
+                    while (query.HasMoreResults);
+                }
             }
 
             return true;

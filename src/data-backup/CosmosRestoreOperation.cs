@@ -108,14 +108,13 @@ namespace DataBackup
 
                 await Client.CreateDocumentCollectionIfNotExistsAsync(Database.SelfLink, documentCollection, collectionOptions).ConfigureAwait(false);
 
-                var data = await file.ReadAsync().ConfigureAwait(false);
-
                 var collectionUri = UriFactory.CreateDocumentCollectionUri(Database.Id, file.EntityName);
 
-                Log.Information("Found {Count} objects to restore", data.Count);
-
-                foreach (JObject entity in data)
+                var count = 0;
+                foreach (var entity in file.Read())
                 {
+                    count++;
+
                     if (checkPartitionKey && !entity.ContainsKey(options.PartitionKey))
                     {
                         entity.Add(options.PartitionKey, options.PartitionKeyDefault);
@@ -123,6 +122,8 @@ namespace DataBackup
 
                     await Client.UpsertDocumentAsync(collectionUri, entity, disableAutomaticIdGeneration: true).ConfigureAwait(false);
                 }
+
+                Log.Information("Restored {Count} objects", count);
             }
 
             return true;

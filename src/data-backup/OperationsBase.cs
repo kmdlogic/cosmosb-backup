@@ -62,22 +62,53 @@ namespace DataBackup
                 EntityName = Path.GetFileNameWithoutExtension(file.Name);
             }
 
-            public async Task<JArray> ReadAsync()
+            public IEnumerable<JObject> Read()
             {
                 using (var stream = file.OpenText())
+                using (var reader = new JsonTextReader(stream))
                 {
-                    return await JArray.LoadAsync(new JsonTextReader(stream)).ConfigureAwait(false);
+                    while (reader.Read())
+                    {
+                        if (reader.TokenType == JsonToken.StartObject)
+                        {
+                            var obj = JObject.Load(reader);
+                            yield return obj;
+                        }
+                    }
                 }
             }
 
-            public async Task WriteAsync(JArray data)
+            public DataWriter BeginWrite()
             {
-                using (var stream = file.CreateText())
+                var writer = new JsonTextWriter(file.CreateText())
                 {
-                    var writer = new JsonTextWriter(stream) { Formatting = Formatting.Indented };
+                    CloseOutput = true,
+                    Formatting = Formatting.Indented
+                };
 
-                    await data.WriteToAsync(writer).ConfigureAwait(false);
-                }
+                return new DataWriter(writer);
+            }
+        }
+
+        protected sealed class DataWriter : IDisposable
+        {
+            private readonly JsonTextWriter writer;
+
+            public DataWriter(JsonTextWriter writer)
+            {
+                this.writer = writer;
+                writer.WriteStartArray();
+            }
+
+            public void Write(JObject data)
+            {
+                data.WriteTo(writer);
+            }
+
+            public void Dispose()
+            {
+                writer.WriteEndArray();
+                writer.Close();
             }
         }
     }
