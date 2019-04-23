@@ -11,14 +11,15 @@ Supported actions:
 
   CosmosRestore    Restore a CosmosDB database.
 
+  CosmosFeed       Listen to the change feed from the CosmosDB database.
+
   MartenBackup     Backup a PostgreSQL/Marten database.
 
   MartenRestore    Restore a PostgreSQL/Marten database.
 
   help             Display more information on a specific command.
 
-  version          Display version information.
-```
+  version          Display version information.```
 
 ## CosmosBackup
 
@@ -62,6 +63,31 @@ Generates a file per collection in the database.
 ```
 
 Creates the database if it is missing. For each file, it creates a corresponding collection, setting the `partitionkey` of each object if required. The use of a `partitionkey` is required by CosmosDB when using the `databasethroughput` option.
+
+## CosmosFeed
+
+```
+  -h, --host                (Default: DataBackup) The unique host name for this stream reader.
+
+  -b, --beginning           (Default: false) Start the feed from the beginning.
+
+  -w, --wait                (Default: 1000) The time to wait in ms between feed checks.
+
+  -r, --rangescan           (Default: 0) How often to rescan for new ranges, in multiples of the wait time. 0 =
+                            disable.
+
+  -v, --verbosity           (Default: Information) The logging level.
+
+  -f, --folder              The folder used for the backup or restore. Defaults to the current directory.
+
+  -c, --connectionstring    Required. The connection string to CosmosDb.
+
+  -m, --connectionmode      (Default: Gateway) The connection mode (Gateway or Direct).
+
+  -d, --databasename        Required. The database name to backup or restore.
+```
+
+Listens to the change feed for a CosmosDB database. Seperate output files are created for each collection. Since the change feed is read by partitionkey ranges, the output may be out of order but any changes with the same partitionkey will be ordered. A single record may appear multiple times, once for each change detected.
 
 ## MartenBackup
 
