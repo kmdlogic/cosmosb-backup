@@ -88,7 +88,7 @@ order by table_name";
                                     }
                                 }
 
-                                writer.Write(orderedData);
+                                await writer.WriteAsync(orderedData).ConfigureAwait(false);
                             }
                         }
                     }

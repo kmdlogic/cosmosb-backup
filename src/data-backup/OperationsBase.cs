@@ -100,9 +100,9 @@ namespace DataBackup
                 writer.WriteStartArray();
             }
 
-            public void Write(JObject data)
+            public async Task WriteAsync(JObject data)
             {
-                data.WriteTo(writer);
+                await data.WriteToAsync(writer).ConfigureAwait(false);
             }
 
             public void Dispose()

@@ -34,6 +34,7 @@
                         .ParseArguments<
                             CosmosBackupOptions,
                             CosmosRestoreOptions,
+                            CosmosFeedOptions,
                             MartenBackupOptions,
                             MartenRestoreOptions
                         >(args)
@@ -46,6 +47,7 @@
                         .MapResult(
                           (CosmosBackupOptions opts) => new CosmosBackupOperation(opts).ExecuteAsync(),
                           (CosmosRestoreOptions opts) => new CosmosRestoreOperation(opts).ExecuteAsync(),
+                          (CosmosFeedOptions opts) => new CosmosFeedOperation(opts).ExecuteAsync(),
                           (MartenBackupOptions opts) => new MartenBackupOperation(opts).ExecuteAsync(),
                           (MartenRestoreOptions opts) => new MartenRestoreOperation(opts).ExecuteAsync(),
                           errs =>

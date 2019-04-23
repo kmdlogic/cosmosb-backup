@@ -57,7 +57,7 @@ namespace DataBackup
 
                         foreach (var item in response)
                         {
-                            writer.Write(JToken.FromObject(item));
+                            await writer.WriteAsync(JToken.FromObject(item)).ConfigureAwait(false);
                         }
                     }
                     while (query.HasMoreResults);
