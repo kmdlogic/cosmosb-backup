@@ -19,7 +19,8 @@ Supported actions:
 
   help             Display more information on a specific command.
 
-  version          Display version information.```
+  version          Display version information.
+```
 
 ## CosmosBackup
 
